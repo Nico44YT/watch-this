@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+	--color-primary-50: #fef2f2;
+	--color-primary-100: #fde5e5;
+	--color-primary-200: #f9c8c8;
+	--color-primary-300: #f5a3a3;
+	--color-primary-400: #e85454;
+	--color-primary-500: #c21c1c;
+	--color-primary-600: #9a1616;
+	--color-primary-700: #721111;
+	--color-primary-800: #4d0c0c;
+	--color-primary-900: #2d0707;
+}
+
+@layer base {
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	button {
+		font-weight: 600;
+	}
+}

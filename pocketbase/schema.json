@@ -1,0 +1,176 @@
+[
+    {
+        "id": "systemprofiles0",
+        "name": "users",
+        "type": "auth",
+        "system": false,
+        "schema": [
+            {
+                "id": "users_username",
+                "name": "username",
+                "type": "text",
+                "system": false,
+                "required": true,
+                "options": {
+                    "min": 3,
+                    "max": 30,
+                    "pattern": "^[a-zA-Z0-9_]+$"
+                }
+            },
+            {
+                "id": "users_onboarding",
+                "name": "onboarding_completed",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "listRule": "id = @request.auth.id",
+        "viewRule": "id = @request.auth.id",
+        "createRule": "",
+        "updateRule": "id = @request.auth.id",
+        "deleteRule": "id = @request.auth.id",
+        "options": {
+            "allowEmailAuth": true,
+            "allowOAuth2Auth": true,
+            "allowUsernameAuth": false,
+            "exceptEmailDomains": null,
+            "manageRule": null,
+            "minPasswordLength": 8,
+            "onlyEmailDomains": null,
+            "onlyVerified": false,
+            "requireEmail": true
+        }
+    },
+    {
+        "id": "friend_requests",
+        "name": "friend_requests",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "fr_sender",
+                "name": "sender",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "systemprofiles0",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "username"
+                    ]
+                }
+            },
+            {
+                "id": "fr_receiver",
+                "name": "receiver",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "systemprofiles0",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "username"
+                    ]
+                }
+            },
+            {
+                "id": "fr_status",
+                "name": "status",
+                "type": "select",
+                "system": false,
+                "required": true,
+                "options": {
+                    "maxSelect": 1,
+                    "values": [
+                        "pending",
+                        "accepted",
+                        "rejected"
+                    ]
+                }
+            }
+        ],
+        "listRule": "@request.auth.id != \"\" && (sender = @request.auth.id || receiver = @request.auth.id)",
+        "viewRule": "@request.auth.id != \"\" && (sender = @request.auth.id || receiver = @request.auth.id)",
+        "createRule": "@request.auth.id != \"\" && sender = @request.auth.id",
+        "updateRule": "@request.auth.id != \"\" && receiver = @request.auth.id",
+        "deleteRule": "@request.auth.id != \"\" && (sender = @request.auth.id || receiver = @request.auth.id)",
+        "options": {}
+    },
+    {
+        "id": "recommendations",
+        "name": "recommendations",
+        "type": "base",
+        "system": false,
+        "schema": [
+            {
+                "id": "rec_sender",
+                "name": "sender",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "systemprofiles0",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "username"
+                    ]
+                }
+            },
+            {
+                "id": "rec_receiver",
+                "name": "receiver",
+                "type": "relation",
+                "system": false,
+                "required": true,
+                "options": {
+                    "collectionId": "systemprofiles0",
+                    "cascadeDelete": true,
+                    "minSelect": null,
+                    "maxSelect": 1,
+                    "displayFields": [
+                        "username"
+                    ]
+                }
+            },
+            {
+                "id": "rec_url",
+                "name": "url",
+                "type": "url",
+                "system": false,
+                "required": true,
+                "options": {
+                    "exceptDomains": null,
+                    "onlyDomains": [
+                        "youtube.com",
+                        "youtu.be",
+                        "www.youtube.com"
+                    ]
+                }
+            },
+            {
+                "id": "rec_seen",
+                "name": "seen",
+                "type": "bool",
+                "system": false,
+                "required": false,
+                "options": {}
+            }
+        ],
+        "listRule": "@request.auth.id != \"\" && (sender = @request.auth.id || receiver = @request.auth.id)",
+        "viewRule": "@request.auth.id != \"\" && (sender = @request.auth.id || receiver = @request.auth.id)",
+        "createRule": "@request.auth.id != \"\" && sender = @request.auth.id",
+        "updateRule": "@request.auth.id != \"\" && receiver = @request.auth.id",
+        "deleteRule": "@request.auth.id != \"\" && sender = @request.auth.id",
+        "options": {}
+    }
+]
