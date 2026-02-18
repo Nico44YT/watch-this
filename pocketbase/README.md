@@ -22,7 +22,7 @@ This creates all required collections with the correct fields and API rules:
 
 - `users` — extended user profiles (username, onboarding_completed)
 - `friend_requests` — pending/accepted/rejected friend relationships
-- `recommendations` — YouTube video recommendations between friends
+- `link_recommendations` — YouTube video recommendations between friends
 
 ### 3. Point the Extension at Your Instance
 
@@ -38,22 +38,6 @@ Then rebuild the extension:
 npm run build        # Chrome
 npm run build:firefox  # Firefox
 ```
-
-## API Rules (Security)
-
-The schema ships with these rules — **do not remove them**:
-
-| Collection        | Create                   | Read                                                         | Update/Delete                 |
-| ----------------- | ------------------------ | ------------------------------------------------------------ | ----------------------------- |
-| `users`           | `@request.auth.id != ""` | `id = @request.auth.id`                                      | `id = @request.auth.id`       |
-| `friend_requests` | `@request.auth.id != ""` | `sender = @request.auth.id \|\| receiver = @request.auth.id` | `receiver = @request.auth.id` |
-| `recommendations` | `@request.auth.id != ""` | `sender = @request.auth.id \|\| receiver = @request.auth.id` | `receiver = @request.auth.id` |
-
-These rules ensure:
-
-- Only authenticated users can create records
-- Users can only read their own data (sent or received)
-- Strangers cannot enumerate other users' recommendations or friend requests
 
 ## Google OAuth (optional)
 
