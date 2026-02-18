@@ -2,7 +2,7 @@
   "name": "wxt-react-starter",
   "description": "manifest.json description",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.4",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -12,7 +12,10 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "deploy": "npm version patch --no-git-tag-version && wxt zip && wxt zip -b firefox",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.18",
