@@ -24,6 +24,7 @@ export function isValidYouTubeUrl(url: string): boolean {
 export async function sendRecommendations(
 	receiverIds: string[],
 	url: string,
+	timestampSeconds?: number | null,
 ): Promise<{ success: boolean; count?: number; error?: string }> {
 	try {
 		const currentUser = pb.authStore.model;
@@ -39,8 +40,8 @@ export async function sendRecommendations(
 			return { success: false, error: "No URL to share" };
 		}
 
-		// Sanitize and validate the YouTube URL
-		const sanitizedUrl = sanitizeYouTubeUrl(url);
+		// Sanitize and validate the YouTube URL; optionally append timestamp
+		const sanitizedUrl = sanitizeYouTubeUrl(url, timestampSeconds);
 		if (!sanitizedUrl) {
 			return {
 				success: false,

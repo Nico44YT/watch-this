@@ -2,7 +2,13 @@
 export type { RecommendationWithMeta, OEmbedData } from "../../types";
 
 // Re-export from shared library
-export { extractVideoId, fetchVideoMetadata } from "../../lib/youtube";
+export {
+	extractVideoId,
+	fetchVideoMetadata,
+	secondsToMmSs,
+	mmSsToSeconds,
+	extractTimestampFromUrl,
+} from "../../lib/youtube";
 
 // Send message to background script
 export async function sendMessage(message: any): Promise<any> {

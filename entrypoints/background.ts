@@ -12,7 +12,12 @@ export type BackgroundMessage =
 	| { type: "markAsSeen"; id: string }
 	| { type: "checkAuth" }
 	| { type: "getFriends" }
-	| { type: "sendRecommendation"; receiverIds: string[]; url: string };
+	| {
+			type: "sendRecommendation";
+			receiverIds: string[];
+			url: string;
+			timestampSeconds?: number | null;
+	  };
 
 // Standard response type
 type MessageResponse<T = unknown> =
@@ -97,6 +102,7 @@ async function handleMessage(
 				const result = await sendRecommendations(
 					message.receiverIds,
 					message.url,
+					message.timestampSeconds,
 				);
 				if (!result.success) throw new Error(result.error);
 				return { count: result.count };

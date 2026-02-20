@@ -1,5 +1,11 @@
 import type { LinkRecommendation, RecommendationWithMeta } from "../../types";
-import { sendMessage, extractVideoId, fetchVideoMetadata } from "./utils";
+import {
+	sendMessage,
+	extractVideoId,
+	fetchVideoMetadata,
+	secondsToMmSs,
+	extractTimestampFromUrl,
+} from "./utils";
 import { createStyleElement } from "./shared-styles";
 
 // Homepage-specific CSS styles
@@ -191,7 +197,11 @@ function createVideoCard(rec: RecommendationWithMeta): HTMLElement {
 
 	const badge = document.createElement("div");
 	badge.className = "watchthis-badge";
-	badge.textContent = `From ${sender}`; // Safe from XSS
+	const timestamp = extractTimestampFromUrl(rec.url);
+	badge.textContent =
+		timestamp !== null
+			? `From ${sender} | Timestamp ${secondsToMmSs(timestamp)}`
+			: `From ${sender}`; // Safe from XSS
 
 	thumbnail.appendChild(img);
 	thumbnail.appendChild(badge);

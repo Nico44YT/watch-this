@@ -23,15 +23,20 @@ export function validateUsername(username: string): {
 
 /**
  * Sanitize a YouTube URL by stripping all query parameters except `v`.
+ * Optionally appends a `t` (timestamp in seconds) parameter for regular watch URLs.
  * Returns null when the URL is not a valid youtube.com URL.
  */
-export function sanitizeYouTubeUrl(url: string): string | null {
+export function sanitizeYouTubeUrl(
+	url: string,
+	timestampSeconds?: number | null,
+): string | null {
 	try {
 		const parsed = new URL(url);
 		if (!parsed.hostname.endsWith("youtube.com")) {
 			return null;
 		}
 		// Shorts URLs have no `v` param — keep the path, strip all query params
+		// Timestamps are not supported for Shorts
 		if (parsed.pathname.includes("/shorts/")) {
 			parsed.search = "";
 			return parsed.toString();
@@ -40,7 +45,11 @@ export function sanitizeYouTubeUrl(url: string): string | null {
 		if (!videoId) {
 			return null;
 		}
-		parsed.search = `?v=${encodeURIComponent(videoId)}`;
+		let search = `?v=${encodeURIComponent(videoId)}`;
+		if (timestampSeconds != null && timestampSeconds > 0) {
+			search += `&t=${Math.floor(timestampSeconds)}`;
+		}
+		parsed.search = search;
 		return parsed.toString();
 	} catch {
 		return null;

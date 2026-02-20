@@ -1,5 +1,5 @@
 import type { User } from "../../types";
-import { sendMessage } from "./utils";
+import { sendMessage, secondsToMmSs, mmSsToSeconds } from "./utils";
 import { browser } from "wxt/browser";
 import { createStyleElement, getSharedStyles } from "./shared-styles";
 
@@ -81,6 +81,74 @@ const videoPageStyles = `
 		font-size: 24px;
 		cursor: pointer;
 		color: var(--yt-spec-text-secondary, #606060);
+	}
+
+	.watchthis-timestamp-divider {
+		height: 1px;
+		background: #f2f2f2;
+		margin: 16px 0;
+	}
+
+	html:not([dark]) .watchthis-timestamp-divider {
+		background: #282828;
+
+	}
+
+	.watchthis-timestamp-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 12px;
+		margin-top: 4px;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background 0.2s ease;
+		user-select: none;
+	}
+
+	.watchthis-timestamp-row:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+
+	html:not([dark]) .watchthis-timestamp-row:hover {
+		background: rgba(0, 0, 0, 0.05);
+	}
+
+	.watchthis-timestamp-row input[type="checkbox"] {
+		width: 18px;
+		height: 18px;
+		accent-color: #cc0000;
+		pointer-events: none;
+		flex-shrink: 0;
+	}
+
+	.watchthis-timestamp-label {
+		flex: 1;
+		font-size: 14px;
+		color: var(--yt-spec-text-primary, #0f0f0f);
+		user-select: none;
+		cursor: pointer;
+		pointer-events: none;
+	}
+
+	.watchthis-timestamp-input {
+		width: 72px;
+		padding: 5px 10px;
+		border-radius: 6px;
+		border: 1px solid var(--yt-spec-10-percent-layer, #ccc);
+		background: var(--yt-spec-base-background, #fff);
+		color: var(--yt-spec-text-primary, #0f0f0f);
+		font-size: 14px;
+		font-family: "Roboto", "Arial", sans-serif;
+	}
+
+	.watchthis-timestamp-input:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	#watchthis-modal .watchthis-modal-actions {
+		margin-top: 20px;
 	}
 `;
 
@@ -260,6 +328,48 @@ async function showRecommendModal() {
 
 	modal.appendChild(friendList);
 
+	// Timestamp section
+	const videoEl = document.querySelector<HTMLVideoElement>("video");
+	const currentSeconds = Math.floor(videoEl?.currentTime ?? 0);
+
+	let timestampCheckbox: HTMLInputElement | null = null;
+	let timestampInput: HTMLInputElement | null = null;
+
+	{
+		const timestampRow = document.createElement("div");
+		timestampRow.className = "watchthis-timestamp-row";
+
+		timestampCheckbox = document.createElement("input");
+		timestampCheckbox.type = "checkbox";
+		timestampCheckbox.checked = false; // Opt-in
+
+		const timestampLabel = document.createElement("label");
+		timestampLabel.className = "watchthis-timestamp-label";
+		timestampLabel.textContent = "Timestamp:";
+
+		timestampInput = document.createElement("input");
+		timestampInput.type = "text";
+		timestampInput.value = secondsToMmSs(currentSeconds);
+		timestampInput.className = "watchthis-timestamp-input";
+		timestampInput.disabled = true;
+
+		// Clicking anywhere on the row toggles the checkbox (like friend items)
+		timestampRow.addEventListener("click", (e) => {
+			if (e.target === timestampInput) return;
+			timestampCheckbox!.checked = !timestampCheckbox!.checked;
+			timestampInput!.disabled = !timestampCheckbox!.checked;
+		});
+
+		const timestampDivider = document.createElement("div");
+		timestampDivider.className = "watchthis-timestamp-divider";
+		modal.appendChild(timestampDivider);
+
+		timestampRow.appendChild(timestampCheckbox);
+		timestampRow.appendChild(timestampLabel);
+		timestampRow.appendChild(timestampInput);
+		modal.appendChild(timestampRow);
+	}
+
 	// Create message div
 	const messageDiv = document.createElement("div");
 	messageDiv.id = "watchthis-modal-message";
@@ -313,10 +423,29 @@ async function showRecommendModal() {
 		sendBtn.disabled = true;
 		sendBtn.textContent = "Sending...";
 
+		// Parse timestamp if the checkbox is active
+		let timestampSeconds: number | null = null;
+		if (timestampCheckbox?.checked && timestampInput) {
+			const parsed = mmSsToSeconds(timestampInput.value);
+			if (parsed === null) {
+				messageDiv.innerHTML = "";
+				const errorDiv = document.createElement("div");
+				errorDiv.className = "watchthis-message watchthis-message-error";
+				errorDiv.textContent =
+					"Invalid timestamp. Please use mm:ss format (e.g. 2:34).";
+				messageDiv.appendChild(errorDiv);
+				sendBtn.disabled = false;
+				sendBtn.textContent = "Send";
+				return;
+			}
+			timestampSeconds = parsed;
+		}
+
 		const result = await sendMessage({
 			type: "sendRecommendation",
 			receiverIds: Array.from(selectedFriends),
 			url: window.location.href,
+			timestampSeconds,
 		});
 
 		if (result.success) {
