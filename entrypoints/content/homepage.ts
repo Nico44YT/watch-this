@@ -84,6 +84,9 @@ const homepageStyles = `
 	}
 
 	.watchthis-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
 		cursor: pointer;
 		border-radius: 12px;
 		overflow: hidden;
@@ -170,10 +173,11 @@ function createStyles(): HTMLStyleElement {
 }
 
 // Create a video card element
-function createVideoCard(rec: RecommendationWithMeta): HTMLElement {
-	const card = document.createElement("div");
+function createVideoCard(rec: RecommendationWithMeta): HTMLAnchorElement {
+	const card = document.createElement("a");
 	card.className = "watchthis-card";
 	card.id = `watchthis-item-${rec.id}`;
+	card.href = rec.url;
 
 	const sender = rec.expand?.sender?.username || "Unknown";
 	const videoId = extractVideoId(rec.url);
@@ -389,10 +393,10 @@ export async function showRecommendations() {
 	recommendationsWithMeta.forEach((rec) => {
 		const card = createVideoCard(rec);
 
-		// Click handler
-		card.addEventListener("click", async () => {
-			// Mark as seen first
-			await sendMessage({ type: "markAsSeen", id: rec.id });
+		// Helper: mark as seen and update the grid UI
+		const markSeenAndUpdateUi = () => {
+			// Fire-and-forget — background script handles the request independently
+			sendMessage({ type: "markAsSeen", id: rec.id });
 
 			// Remove the card from the grid
 			card.remove();
@@ -400,7 +404,6 @@ export async function showRecommendations() {
 			// Update the header count
 			const remainingCards = grid.querySelectorAll(".watchthis-card").length;
 			if (remainingCards === 0) {
-				// No more recommendations, show empty state
 				const countSpan = header.querySelector(".count");
 				if (countSpan) countSpan.remove();
 
@@ -415,9 +418,19 @@ export async function showRecommendations() {
 					countSpan.textContent = `${remainingCards} new`;
 				}
 			}
+		};
 
-			// Navigate to the video
-			window.location.href = rec.url;
+		// Left click (including Ctrl/Cmd/Shift+click for new tab):
+		// Browser handles navigation via href — just fire markAsSeen and update UI.
+		card.addEventListener("click", () => {
+			markSeenAndUpdateUi();
+		});
+
+		// Middle mouse button click → opens in new tab natively via href.
+		card.addEventListener("auxclick", (e) => {
+			if (e.button === 1) {
+				markSeenAndUpdateUi();
+			}
 		});
 
 		grid.appendChild(card);
