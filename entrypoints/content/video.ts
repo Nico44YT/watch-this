@@ -14,7 +14,7 @@ const videoPageStyles = `
 	}
 
 	#watchthis-button {
-		background: #cc0000 !important;
+		background: var(--yt-saturated-base-background) !important;
 		color: white !important;
 		border-radius: 50px !important;
 		padding: 0 16px !important;
